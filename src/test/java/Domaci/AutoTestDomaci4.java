@@ -3,11 +3,13 @@ package Domaci;
 import io.github.bonigarcia.wdm.WebDriverManager;
 import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import java.io.IOException;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,17 +30,19 @@ public class AutoTestDomaci4 {
     WebElement logInButton1, usernameField, passwordField, logInButton2, logOutButton, addBook;
     List<WebElement> knjige;
     int k1, k2;
+    ExcelReader excelReader;
 
     @BeforeClass
-    public void setUp() {
+    public void setUp() throws IOException {
         WebDriverManager.chromedriver().setup();
         driver = new ChromeDriver();
         driver.manage().window().maximize();
         driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(5));
         wait = new WebDriverWait(driver, Duration.ofSeconds(3));
+        excelReader = new ExcelReader("D:\\Users\\ANDRA\\Desktop\\TestData.xlsx");
 
-        validUsername = "pera";
-        validPassword = "Lozinka123$";
+        validUsername = excelReader.getStringData("Login", 1, 0);
+        validPassword = excelReader.getStringData("Login", 1, 1);
 
         loginURL = "https://demoqa.com/login";
         booksURL = "https://demoqa.com/books";
@@ -82,6 +86,11 @@ public class AutoTestDomaci4 {
         Assert.assertTrue(logInButton1.isDisplayed());
     }
 
+    @Test(priority = 5)
+    public void logInWithExcelData(){
+
+    }
+
     @Test(priority = 10)
     public void userLogInSuccessfullyWithCookies(){
 
@@ -111,6 +120,7 @@ public class AutoTestDomaci4 {
             nasloviKnjiga.add(knjige.get(dveKnjige[i]).getText());
             jse.executeScript("arguments[0].scrollIntoView()", knjige.get(dveKnjige[i]));
             knjige.get(dveKnjige[i]).click();
+            wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//button[contains(text(), 'Add To Your Collection')]")));
             addBook = driver.findElement(By.xpath("//button[contains(text(), 'Add To Your Collection')]"));
             addBook.click();
             driver.navigate().back();
